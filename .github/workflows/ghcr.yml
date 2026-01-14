@@ -8,9 +8,20 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write   # 允许推送到 GHCR
+      packages: write
 
     steps:
+      - name: Free Disk Space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: false
+          swap-storage: true
+          
       - name: Show disk
         run: df -h
 
