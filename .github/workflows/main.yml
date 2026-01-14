@@ -1,19 +1,41 @@
-name: Docker Image Saver
+name: Docker Image Saver (Free Space)
 on: workflow_dispatch
 
 jobs:
   pull-save-upload:
     runs-on: ubuntu-latest
     steps:
+      # 1. 第一步：深度清理磁盘空间
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          # 删除不需要的大文件和预装库
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: false # 保留 Docker 基础环境
+          swap-storage: true
+
+      # 2. 检查一下现在有多少空间
+      - name: Check Disk Space
+        run: df -h
+
+      # 3. 拉取镜像
       - name: Pull Docker Image
         run: docker pull stepfun2025/vllm:step-audio-2-v20250909
 
-      - name: Save Docker Image to Tar
-        run: docker save -o stepfun-vllm.tar stepfun2025/vllm:step-audio-2-v20250909
+      # 4. 保存并压缩
+      # 使用 gzip 边打包边压缩，既省空间又方便后续上传
+      - name: Save Docker Image to Tar.gz
+        run: |
+          docker save stepfun2025/vllm:step-audio-2-v20250909 | gzip > stepfun-vllm.tar.gz
 
+      # 5. 上传 Artifact
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: stepfun-image
-          path: stepfun-vllm.tar
+          name: stepfun-image-gz
+          path: stepfun-vllm.tar.gz
           retention-days: 1
