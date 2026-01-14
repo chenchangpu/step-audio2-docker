@@ -1,0 +1,29 @@
+name: Mirror Docker Image to GHCR
+
+on:
+  workflow_dispatch:
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write   # 允许推送到 GHCR
+
+    steps:
+      - name: Show disk
+        run: df -h
+
+      - name: Login to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Pull image from Docker Hub
+        run: docker pull stepfun2025/vllm:step-audio-2-v20250909
+
+      - name: Tag image for GHCR
+        run: |
+          docker tag stepfun2025/vllm:step-audio-2-v20250909 \
+            ghcr.io/chenchangpu/step-audio2:latest
+
+      - name: Push image to GHCR
+        run: docker push ghcr.io/chenchangpu/step-audio2:latest
