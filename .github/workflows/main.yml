@@ -1,0 +1,19 @@
+name: Docker Image Saver
+on: workflow_dispatch
+
+jobs:
+  pull-save-upload:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull Docker Image
+        run: docker pull stepfun2025/vllm:step-audio-2-v20250909
+
+      - name: Save Docker Image to Tar
+        run: docker save -o stepfun-vllm.tar stepfun2025/vllm:step-audio-2-v20250909
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: stepfun-image
+          path: stepfun-vllm.tar
+          retention-days: 1
